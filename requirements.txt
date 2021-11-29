@@ -1,0 +1,9 @@
+#Adafruit-Pure
+#Adafruit-PlatformDetect
+#adafruit-circuitpython-framebuf
+#adafruit-circuitpython-epd
+#adafruit-circuitpython-busdevice
+adafruit-circuitpython-bme280
+#Adafruit-Blinka
+mysql
+ipython
