@@ -20,9 +20,9 @@ class Config:
     Config handler, for now using a python modules to contain settings.
     """
     def __init__(self, service: str) -> None:
-        import config as config_module
+        # import config as config_module
         self._service = service
-        self.config = getattr(config_module, self._service)
+        # self.config = getattr(config_module, self._service)
 
     def list_attributes(self):
         return dir(self.config)
