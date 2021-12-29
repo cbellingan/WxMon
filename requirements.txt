@@ -5,5 +5,9 @@
 #adafruit-circuitpython-busdevice
 adafruit-circuitpython-bme280
 #Adafruit-Blinka
-mysql
+mysql-connector-python
+numpy
 ipython
+pandas
+matplotlib
+#picamera

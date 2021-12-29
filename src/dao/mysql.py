@@ -1,19 +1,32 @@
+from config import MySqlDb
 import dao
+import mysql.connector
 
-from utils import Config
-# from dao import DbBase
 
-class MySqlDBWriter(dao.DbBase):
-    pass
+class DB(dao.DbBase):
+    def __init__(self, config):
+        self._password = config.password
+        self._username = config.username
+        self._db_endpoint = config.endpoint
+        self._db_port = config.port
+        self._db_name = config.db
+        self._connection = None
+    
+    def connection(self):
+        if self._connection is None:
+            self._connection = mysql.connector.connect(
+                user=self._username, 
+                database=self._db_name, 
+                host=self._db_endpoint, 
+                password=self._password, 
+                port=self._db_port
+            )
+        return self._connection
 
-def depr():
-    #TODO define the interface here
-    cfg = Config('MySqlDb')
-    cnx = mysql.connector.connect(
-        user=cfg.username, 
-        database=cfg.db, 
-        host=cfg.endpoint, 
-        password=cfg.password, 
-        port=cfg.port
-    )
-    cursor = cnx.cursor()
+    def cursor(self):
+        return self.connection().cursor()
+    
+    def execute(self, sql_string):
+        cur = self.cursor()
+        cur.execute(sql_string)
+        return cur.fetchall()

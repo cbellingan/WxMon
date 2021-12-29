@@ -5,14 +5,30 @@ class System:
     Interface to system info required
     """
     @staticmethod
-    def getmac(interface):
-        "Return the mac address of the provided interface, only works on linux."
+    def get_mac(interface):
+        """
+        Return the mac address of the provided interface, only works on linux.
+        """
         try:
             # This isn't portable but is only expected to run on a pi
             mac = open('/sys/class/net/'+interface+'/address').readline()
         except: #TODO better failure handling here.
             mac = "00:00:00:00:00:00"
         return mac[0:17]
+
+    @staticmethod
+    def get_serial():
+        """
+        Return the serial number of the PI
+        This isn't portable but is only expected to run on a pi
+        """
+        # expect the form 'Serial\t\t: 10000000bc2b0d04\n'
+        cpuinfo = open('/proc/cpuinfo').readlines()
+        for line in cpuinfo:
+            if 'Serial' in line:
+                return line.split(':')[1].strip()
+        return None
+    
 
 
 class Config:

@@ -5,9 +5,13 @@ from dataclasses import dataclass
 @dataclass
 class DbBase():
     @abstractclassmethod
-    def init(self):
+    def init(self, config):
         pass
 
     @abstractclassmethod
-    def start(self):
+    def connect(self):
+        pass
+
+    @abstractclassmethod
+    def execute(self, sql_string: str):
         pass
