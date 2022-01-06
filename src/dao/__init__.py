@@ -15,3 +15,15 @@ class DbBase():
     @abstractclassmethod
     def execute(self, sql_string: str):
         pass
+
+
+@dataclass
+class Persistor():
+    def __init__(self, writer: DbBase) -> None:
+        pass
+
+    def init(self):
+        pass
+
+    def start(self):
+        pass    

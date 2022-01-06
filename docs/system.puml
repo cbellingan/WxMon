@@ -1,21 +1,61 @@
 @startuml
-User -> Server: request
 
-Class01 <|-- Class02
-Class03 *-- Class04
-Class05 o-- Class06
-Class07 .. Class08
-Class09 -- Class10
+' Class01 <|-- Class02
+' Class03 *-- Class04
+' Class05 o-- Class06
+' Class07 .. Class08
+' Class09 -- Class10
 
+SensorABC -> Singleton
+SensorABC *-- Result
 
-class Dummy {
-  String data
-  void methods()
+class Reading {
+    +string unit
+    +float value
 }
 
-class Flight {
-   flightNumber : Integer
-   departureTime : Date
+class Result{
+    +uint timestamp: timestamp in seconds since epoch
+    +Reading[] reading: List of readings 
 }
 
+class SensorABC {
+    .. Notes ..
+    It is the sensors job to ensure it can register and read data.
+    No sensor specific failures are bubbled up
+  
+    .. Public ..
+    +boolean start(): 
+    starts capturing data from sensors
+
+    +boolean init(rate: int): 
+    initializes the hardware to capture as the given rate
+
+    +void close():
+    idempotent, cleans up hardware and shuts down as needed, failures here
+    need to be completely handled by the sensor module
+
+    +Result latest(): returns the latest result
+
+    .. Private ..
+    -boolean __is_initialized()
+    -void __main(): 
+    contains hardware specific control code
+}
+
+class SensorManager {
+    .. Public ..
+    +boolean register(Sensor)
+    Registers and initializes a sensor. Returns True on success.
+    +void deregister(Sensor)
+    Attempts to call the sensors close and deregisters it.
+
+    +boolean start()
+    Starts each sensors capture. If this fails for a sensor, it is de-registered and 
+    the sensormanager moves on.
+    Starts the capture thread at the preconfigured rate, thus persisting data to disk
+
+    +boolean close()
+    Closes all sensors
+}
 @enduml

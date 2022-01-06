@@ -9,7 +9,7 @@ class BME820Sensor():
         logging.info('register bme')
 
     def start(self):
-        logging.info('start bme')        
+        logging.info('start bme')
 
 
 #TODO define the interface... 

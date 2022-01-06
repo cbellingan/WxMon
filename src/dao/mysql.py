@@ -1,4 +1,3 @@
-from config import MySqlDb
 import dao
 import mysql.connector
 
