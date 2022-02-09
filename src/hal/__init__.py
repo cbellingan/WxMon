@@ -1,6 +1,7 @@
 from distutils.command.config import config
 import logging
 import os
+from re import M
 import time
 from abc import abstractclassmethod
 from dataclasses import dataclass, field
@@ -20,6 +21,10 @@ class SensorConfig():
 class Units(Enum):
     DegC = 'deg_c'
     DegF = 'deg_f'
+    NA = 'None'
+    Pct = 'Percent'
+    hPa = 'HectoPascal'
+    m = 'Meters'
 
 
 @dataclass
@@ -62,13 +67,17 @@ class SensorABC():
         self._enabled = False
         self._proc = None
 
+    @staticmethod
+    def now():
+        return time.time()
+
     @property
     def enabled(self):
         return self._enabled
 
     @property
     def name(self):
-        return str(self.__class__)
+        return str(self.__class__.__name__)
 
     @staticmethod
     def cap_fn():
@@ -79,14 +88,18 @@ class SensorABC():
         return time.time()
 
     @staticmethod
-    def _cap_thread(cap_fn, rate: int = 2):
+    def _cap_thread(cap_fn, rate: int = 10):
         threading.Timer(
             interval=rate,
             function=SensorABC._cap_thread,
-            args=(cap_fn,),
+            args=(cap_fn, rate),
             ).start()
-        logging.info('... capturing')
+        logging.info(f'... {__class__.__name__} capturing at {rate}')
+        ts_start = time.time()
         ret = cap_fn()
+        fn_duration = time.time() - ts_start
+        if fn_duration > rate:
+            logging.warn(f'Capture druation {fn_duration} is greater than function rate {rate}')
         print(f'Got: {ret}')
         return ret
 
@@ -97,17 +110,17 @@ class SensorABC():
     def start(self) -> bool:
         if self._proc is not None:
             self.start_sensor()
-            logging.info('Starting capture process')
+            logging.info(f'Starting capture process for {self.__class__.__name__} with pid: {self._proc.pid}')
             self._proc.start()
         else:
-            logging.error("Can't start start, not initialized")
+            logging.error(f"Can't start {self.__class__.__name__}, not initialized")
 
     @abstractclassmethod
     def stop_sensor(self) -> bool:
         pass
 
     def stop(self) -> bool:
-        logging.info('Stopping sensor')
+        logging.info(f'Stopping sensor for {self.__class__.__name__}')
         if self._proc is not None:
             self._proc.terminate()
             self._proc = None
@@ -115,7 +128,7 @@ class SensorABC():
 
     @abstractclassmethod
     def init_sensor(self):
-        logging.info('init sensor')
+        logging.info(f'Init sensor {self.__class__.__name__}')
         pass
 
     def init(self) -> bool:
@@ -123,14 +136,15 @@ class SensorABC():
         Perform the sensors initialization, any failures in the sensor should result
         in a sensor being disabled.
         """
-        logging.info('Sensor init')
+        logging.info(f'Sensor init for {self.__class__.__name__}')
         if self._proc is None:
             self.init_sensor()
+            proc_args = (self.cap_fn, self._config.rate)
             self._proc = Process(
                 target=self._cap_thread,
-                args=(self.cap_fn, self._config.rate)
+                args=proc_args
             )
-            logging.info('Process initialized')
+            logging.info(f'Process initialized: {self._proc.name} with {proc_args}')
 
     @abstractclassmethod
     def close(self):

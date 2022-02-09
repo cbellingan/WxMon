@@ -1,3 +1,4 @@
+import logging
 from hal import SensorABC, Reading, Result, Units
 import time
 import os
@@ -9,6 +10,7 @@ class RaspberryCPUTemp(SensorABC):
     """
     def __init__(self, config):
         super(RaspberryCPUTemp, self).__init__(config)
+        self._enabled = True
 
     def start_sensor(self) -> bool:
         return True
@@ -21,8 +23,8 @@ class RaspberryCPUTemp(SensorABC):
         pass
 
     @staticmethod
-    def cap_fn() -> Result:
-        ts = time.time()
+    def cap_fn() -> Result:        
+        ts = SensorABC.now()
         # https://github.com/raspberrypi/linux/blob/7fb9d006d3ff3baf2e205e0c85c4e4fd0a64fcd0/Documentation/driver-api/thermal/sysfs-api.rst
         temperature =  float(
             open('/sys/class/thermal/thermal_zone0/temp', 'r').read()
